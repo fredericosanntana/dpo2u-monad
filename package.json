@@ -8,7 +8,12 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.ts --network monad-testnet",
-    "stress-test": "hardhat run scripts/stress-test.ts"
+    "stress-test": "hardhat run scripts/stress-test.ts",
+    "demo": "hardhat run scripts/demo.ts --network monad-testnet",
+    "volume": "hardhat run scripts/volume.ts --network monad-testnet",
+    "showcase": "hardhat run scripts/showcase.ts --network monad-testnet",
+    "deploy-game": "hardhat run scripts/deploy-game.ts --network monad-testnet",
+    "demo-game": "hardhat run scripts/demo-game.ts --network monad-testnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
