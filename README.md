@@ -200,9 +200,104 @@ function submitProof(
 | **Validacao de ano [2024-2030]** | Anti-replay: impede que uma prova de 2026 seja reutilizada em 2040. |
 | **Groth16 ao inves de PLONK/STARKs** | Provas constantes de 192 bytes, ~250k gas, ferramental EVM mais maduro. |
 
+## Consumer App — AgeGatedGame (Case Roblox x Lei FELCA)
+
+A **Lei FELCA** (ECA Digital) provocou a **#RevoltaDoRoblox** — milhoes de menores protestando contra a verificacao de idade obrigatoria em plataformas de jogos. O `AgeGatedGame` e um consumer app que demonstra como um jogo na Monad integraria o DPO2U para cumprir a lei:
+
+- **Adulto verificado (ZK):** joga normalmente — `joinGame()`, `enableChat()`, `purchaseItem()`
+- **Menor (nao verificado):** so pode `protestar()` — gravado on-chain, imutavel e eterno
+- **Adulto tenta protestar:** *"FELCA: voce ja pode jogar, para de reclamar"* 😂
+
+```
+Adulto (ZK verified)              Menor (sem prova)
+====================              ==================
+joinGame()      ✅ OK              joinGame()      ❌ BLOQUEADO
+enableChat()    ✅ OK              enableChat()    ❌ BLOQUEADO
+purchaseItem()  ✅ OK              purchaseItem()  ❌ BLOQUEADO
+protestar()     ❌ BLOQUEADO       protestar()     ✅ OK (on-chain!)
+```
+
+### Contrato `AgeGatedGame.sol`
+
+```solidity
+contract AgeGatedGame {
+    IComplianceRegistry public registry;
+
+    modifier onlyAdult() {
+        require(registry.isAdult(msg.sender), "FELCA: verifique sua idade primeiro");
+        _;
+    }
+
+    modifier onlyMinor() {
+        require(!registry.isAdult(msg.sender), "FELCA: voce ja pode jogar, para de reclamar");
+        _;
+    }
+
+    function joinGame()                    external onlyAdult { ... }
+    function enableChat()                  external onlyAdult { ... }
+    function purchaseItem(uint256 itemId)  external onlyAdult { ... }
+    function protestar(string msg)         external onlyMinor { ... } // salva on-chain!
+    function getProtestos()                external view returns (Protesto[] memory) { ... }
+}
+```
+
+### Demo — 15 transacoes reais na Monad Testnet
+
+```
+npm run demo-game
+```
+
+```
+  4. ADULTO — Jogando normalmente
+  │ joinGame()       OK ✅
+  │ enableChat()     OK ✅
+  │ purchaseItem(42) OK ✅ Skin Legendaria
+  │ purchaseItem(7)  OK ✅ Espada de Diamante
+  │ purchaseItem(99) OK ✅ Pet Dragao
+
+  5. MENOR — Tentando jogar...
+  │ joinGame()       BLOQUEADO ❌
+  │ Revert           FELCA: verifique sua idade
+
+  6. MENOR — Protestando on-chain (TX reais!)
+  │ 📢 protestar()   "QUERO JOGAR ROBLOX!!!" ✅
+  │ 📢 protestar()   "LEI FELCA INJUSTA!!! DEVOLVE MEU JOGO" ✅
+  │ 📢 protestar()   "#RevoltaDoRoblox #ForaFELCA" ✅
+
+  7. ADULTO — Tentando protestar por solidariedade...
+  │ protestar()      BLOQUEADO ❌
+  │ Motivo           voce ja pode jogar, para de reclamar 😂
+```
+
+### Testes — 10 testes unitarios
+
+```
+npm run test -- test/game.test.ts
+```
+
+```
+AgeGatedGame (Case Roblox x Lei FELCA)
+  Deploy
+    ✔ 1. deploys with correct registry address
+  Adulto verificado — joga normalmente
+    ✔ 2. joinGame() OK, emite PlayerJoined
+    ✔ 3. enableChat() OK apos joinGame
+    ✔ 4. purchaseItem(42) OK, emite ItemPurchased
+    ✔ 5. enableChat() sem joinGame reverte
+    ✔ 6. joinGame() duplicado reverte
+  Menor — so pode protestar
+    ✔ 7. joinGame() reverte com mensagem FELCA
+    ✔ 8. protestar() OK, salva on-chain
+    ✔ 9. multiplos protestos de diferentes menores
+  Adulto nao pode protestar
+    ✔ 10. protestar() reverte — 'para de reclamar'
+
+10 passing (6s)
+```
+
 ## Resultados dos Testes
 
-15 testes unitarios cobrindo o fluxo ZK completo (Hardhat + provas Groth16 reais):
+25 testes unitarios cobrindo o fluxo ZK completo + consumer app (Hardhat + provas Groth16 reais):
 
 ```
 ComplianceRegistry (ZK v3)
@@ -248,6 +343,7 @@ Verificacao continua de 5 minutos por 10 consumer dApps simulados:
 |----------|----------|
 | **Groth16Verifier** | `0x05DB1C300aF638F2a028Cd949d9AC638d8294360` |
 | **ComplianceRegistry** | `0x0F953948Cb58ddA0996D8633a642F5bA47fd214a` |
+| **AgeGatedGame** | `0x4c816264EabEcA2Dd5C27C27C88c2eCc4eC0f1e9` |
 | **Owner** | `0x2645AaC1e42EF3652156932B1181eA72006e22cF` |
 
 ## Estrutura do Projeto
@@ -262,14 +358,21 @@ dpo2u-monad/
 │   └── age_check_final.zkey           # Proving key (trusted setup)
 ├── contracts/
 │   ├── Verifier.sol                   # Verificador Groth16 auto-gerado
-│   └── ComplianceRegistry.sol         # Contrato principal (verificacao ZK + registro)
+│   ├── ComplianceRegistry.sol         # Contrato principal (verificacao ZK + registro)
+│   └── AgeGatedGame.sol               # Consumer app (Case Roblox x Lei FELCA)
 ├── scripts/
 │   ├── build-circuit.sh               # Pipeline completa de build do circuito
 │   ├── prove.ts                       # Geracao de prova client-side (snarkjs)
 │   ├── deploy.ts                      # Deploy Verifier + Registry
-│   └── stress-test.ts                 # Demo 5min de verificacao continua por dApps
+│   ├── deploy-game.ts                 # Deploy AgeGatedGame
+│   ├── demo.ts                        # Demo funcional do protocolo
+│   ├── demo-game.ts                   # Demo AgeGatedGame (15 TX reais)
+│   ├── showcase.ts                    # Showcase teatral com dashboard live
+│   ├── volume.ts                      # Load test continuo
+│   └── stress-test.ts                 # Benchmark 5min de verificacao por dApps
 ├── test/
-│   └── compliance.test.ts             # 15 testes unitarios ZK-based
+│   ├── compliance.test.ts             # 15 testes unitarios ZK-based
+│   └── game.test.ts                   # 10 testes consumer app
 ├── hardhat.config.ts                  # Monad Testnet (chainId 10143)
 └── package.json
 ```
@@ -291,6 +394,18 @@ npx hardhat test
 
 # Deploy na Monad Testnet
 npx hardhat run scripts/deploy.ts --network monad-testnet
+
+# Deploy do consumer app (AgeGatedGame)
+npm run deploy-game
+
+# Demo do protocolo
+npm run demo
+
+# Demo do AgeGatedGame (Case Roblox x Lei FELCA)
+npm run demo-game
+
+# Showcase teatral com dashboard live
+npm run showcase
 
 # Rodar stress test demo
 npx hardhat run scripts/stress-test.ts
