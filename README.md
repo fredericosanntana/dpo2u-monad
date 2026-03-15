@@ -90,6 +90,57 @@ const isAdult = await registry.isAdult(userAddress); // --> true
 // Emite evento ComplianceQueried para trilha de auditoria regulatoria
 ```
 
+## Integre no seu dApp
+
+### 1. On-chain (Solidity)
+
+```solidity
+// Interface minima — copie para o seu contrato
+interface IComplianceRegistry {
+    function isAdult(address subject) external returns (bool);
+}
+
+contract SeuDApp {
+    IComplianceRegistry constant REGISTRY =
+        IComplianceRegistry(0x0F953948Cb58ddA0996D8633a642F5bA47fd214a); // Monad Testnet
+
+    modifier onlyAdult() {
+        require(REGISTRY.isAdult(msg.sender), "DPO2U: usuario nao verificado");
+        _;
+    }
+
+    function acessoRestrito() external onlyAdult {
+        // sua logica aqui — so adultos verificados entram
+    }
+}
+```
+
+### 2. Off-chain (TypeScript / ethers.js)
+
+```typescript
+import { ethers } from "ethers";
+
+const REGISTRY = new ethers.Contract(
+  "0x0F953948Cb58ddA0996D8633a642F5bA47fd214a",
+  ["function isAdult(address) returns (bool)"],
+  provider
+);
+
+const adulto = await REGISTRY.isAdult.staticCall(userAddress); // leitura sem gas
+```
+
+### 3. Usuario gera e submete prova
+
+```typescript
+import { generateAgeProof } from "./scripts/prove";
+
+// 1. Gerar prova off-chain (birth_year NUNCA sai do dispositivo)
+const { a, b, c, input } = await generateAgeProof(1990);
+
+// 2. Submeter on-chain
+await registry.submitProof(a, b, c, input);
+```
+
 ## O Circuito — `age_check.circom`
 
 ```circom
