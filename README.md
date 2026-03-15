@@ -1,5 +1,7 @@
 # DPO2U x Monad — Verificacao de Maioridade com ZK Proofs Nativos
 
+MonadBLitz Rio de Janeiro
+
 **Submissao MonadBlitz Hackathon**
 
 https://github.com/fredericosanntana/dpo2u-monad/raw/main/DPO2U_Monad.mp4
