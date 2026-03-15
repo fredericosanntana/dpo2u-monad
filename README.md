@@ -4,7 +4,7 @@ MonadBLitz Rio de Janeiro
 
 **Submissao MonadBlitz Hackathon**
 
-[![Demo Video](https://youtu.be/Oi5PKiFv8q4)
+[![Demo Video](https://youtu.be/Oi5PKiFv8q4)]
 
 https://youtu.be/Oi5PKiFv8q4
 
