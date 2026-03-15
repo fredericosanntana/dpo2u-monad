@@ -1,0 +1,14 @@
+node_modules/
+dist/
+cache/
+artifacts/
+typechain-types/
+coverage/
+coverage.json
+.env
+build/
+*.ptau
+*.zkey
+*.wasm
+*.r1cs
+*.sym

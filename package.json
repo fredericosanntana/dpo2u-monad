@@ -1,0 +1,26 @@
+{
+  "name": "dpo2u-monad",
+  "version": "1.0.0",
+  "description": "DPO2U Compliance Protocol — Monad Network (Age Verification)",
+  "scripts": {
+    "build:circuit": "bash scripts/build-circuit.sh",
+    "build:all": "bash scripts/build-circuit.sh && hardhat compile",
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.ts --network monad-testnet",
+    "stress-test": "hardhat run scripts/stress-test.ts"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "circomlib": "^2.0.5",
+    "dotenv": "^16.4.0",
+    "ethers": "^6.13.0",
+    "snarkjs": "^0.7.6"
+  }
+}
