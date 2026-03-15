@@ -4,9 +4,9 @@ MonadBLitz Rio de Janeiro
 
 **Submissao MonadBlitz Hackathon**
 
-[![Demo Video](https://img.shields.io/badge/Demo-Video-blue?style=for-the-badge&logo=youtube)](https://github.com/fredericosanntana/dpo2u-monad/releases/download/v1.0.0/DPO2U_Monad.mp4)
+[![Demo Video](https://youtu.be/Oi5PKiFv8q4)
 
-https://github.com/fredericosanntana/dpo2u-monad/releases/download/v1.0.0/DPO2U_Monad.mp4
+https://youtu.be/Oi5PKiFv8q4
 
 > Qualquer dApp na Monad verifica se um endereco pertence a um adulto — em menos de 0,4s, por menos de $0,001, sem que nenhum dado pessoal toque a blockchain. A prova e gerada pelo proprio usuario, verificada matematicamente pelo contrato, sem nenhuma autoridade central no meio.
 
